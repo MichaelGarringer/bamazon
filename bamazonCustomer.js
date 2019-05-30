@@ -8,23 +8,39 @@ var connection = mysql.createConnection({
   password: "",
   database: "bamazon"
 });
-
-// connect to the mysql server and sql database
 connection.connect(function(err) {
   if (err) throw err;
-  // run the start function after the connection is made to prompt the user
   start();
 });
 
+function start() {
+  inquirer
+    .prompt({
+      name: "prompt",
+      type: "list",
+      message: "Would you like to [BUY] an auction or [VIEW] on an auction?",
+      choices: ["BUY", "VIEW", "EXIT"]
+    })
+    .then(function(answer) {
+      // based on their answer, either call the bid or the post functions
+      if (answer.prompt === "BUY") {
+        buy();
+      }
+      else if(answer.prompt === "VIEW") {
+        view();
+      } else{
+        connection.end();
+      }
+    });
+}
 
 
+function buy(){
+  console.log("Feature coming soon!")
+  start();
+}
+function view(){
+  console.log("Feature coming soon!")
+  start();
+}
 
-inquirer
-    .prompt(
-        [
-            {
-
-
-
-            }
-        ]);
