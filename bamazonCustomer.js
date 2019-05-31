@@ -1,3 +1,4 @@
+//start connection
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 
@@ -10,9 +11,10 @@ var connection = mysql.createConnection({
 });
 connection.connect(function (err) {
   if (err) throw err;
-  start();
+  
 });
 
+start();
 function start() {
   inquirer
     .prompt({
@@ -22,7 +24,7 @@ function start() {
       choices: ["BUY", "VIEW", "EXIT"]
     })
     .then(function (answer) {
-      // based on their answer, either call the bid or the post functions
+
       if (answer.prompt === "BUY") {
         buy();
       }
@@ -33,73 +35,127 @@ function start() {
       }
     });
 }
-
-
-function buy() {
-  inquirer
-    .prompt({
-      name: "buyWhat",
-      type: "input",
-      message: "Please insert the item ID of the item you wish to purchase? (If you don't know, you can always VIEW)"
-    }).then(function (answer) {
-      var query = "SELECT product_name, price, stock_quantity FROM products WHERE ?";
-      connection.query(query, { item_id: answer.buyWhat }, function (err, res) {
-        for (var i = 0; i < res.length; i++) {
-          console.log("Product: " + res[i].product_name + " || Price: " + res[i].price + " || Number in Stock: " + res[i].stock_quantity);
-          again();
-        }
-      });
-    })
-}
-
 function view() {
-  console.log("================")
   connection.query("SELECT * FROM products", function (err, res) {
     if (err) throw err;
     else {
-      for (var i = 0; i < res.length; i++) {
-        console.log(
-          `
-        --------------------------------------------  
-        || ID: ${res[i].item_id} 
-        || Product Name: ${res[i].product_name} 
-        || Department:  ${res[i].department_name}  
-        || Price: ${res[i].price} 
-        || Number in stock: ${res[i].stock_quantity}
-        --------------------------------------------
-        `);
+      // for (var i = 0; i < res.length; i++) {
+      //   console.log(
+      //     `
+      //   --------------------------------------------  
+      //   || ID: ${res[i].item_id} 
+      //   || Product Name: ${res[i].product_name} 
+      //   || Department:  ${res[i].department_name}  
+      //   || Price: ${res[i].price} 
+      //   || Number in stock: ${res[i].stock_quantity}
+      //   --------------------------------------------
+      //   `);
+      // }
+      console.table(res)
+      start();
+   }
+  });
+}
+function buy() {
+  inquirer
+    .prompt([{
+      name: "buyWhat",
+      type: "input",
+      message: "Please insert the item ID of the item you wish to purchase",
+      filter: Number
+    },
+    {
+      name: "howMany",
+      type: "input",
+      message: "And how many do you want?",
+      filter: Number
+    }
+    ]).then(function (answer) {
+      if (answer.buyWhat <= 55 && answer.buyWhat >= 45) {
+        var query = "SELECT product_name, price, stock_quantity FROM products WHERE ?";
+        connection.query(query, { item_id: answer.buyWhat }, function (err, res) {
+          for (var i = 0; i < res.length; i++) {
+            console.log(`
+              `);
+          }
+          var thingBought = answer.buyWhat
+          var howManyBought = answer.howMany
+          purchase(thingBought, howManyBought)
+        });
       }
+      else {
+        console.log("-----")
+        console.log("Sorry that doesn't match one of the items we have in our database")
+        console.log("-----")
+        buy();
+      }
+    });
+};
+function purchase(product, numberToBuy) {
+  connection.query('Select * FROM products WHERE item_id = ' + product, function (err, res) {
+    if (err) { console.log(err) };
+     var newQuantity = res[0].stock_quantity - numberToBuy
+    if (numberToBuy <= res[0].stock_quantity) {
+      var totalCost = res[0].price * numberToBuy;
 
+var selectedProductMeta = {
+"Item Bought": res[0].product_name,
+"Number Bought": numberToBuy,
+"Total": totalCost}
+
+
+console.log("Your item is in stock! Purchase Complete!")
+console.table([selectedProductMeta])  
+console.log("You will now be returned to the beginning")
+console.log("------------")
+
+ connection.query(`UPDATE products SET stock_quantity = ${newQuantity} WHERE item_id = ${product} `);
       start();
 
+    } else {
+      console.log(`
+---------------------------------------------------------------------------
+We don't have enough ${res[0].product_name} in stock to complete your order.
+---------------------------------------------------------------------------
+---------------------------------------
+We will now return you to the beginning 
+---------------------------------------`)
+    };
 
-    }
-  }
-  )
-}
 
-function again() {
-  inquirer
-    .prompt({
-      name: "addToCart",
-      type: "list",
-      message: "Would you like to add this item to your cart?",
-      choices: ["Yes", "No", "View", "Exit"]
-    })
-    .then(function (answer) {
-      switch (answer.addToCart) {
-        case "Yes":
-         console.log("Function coming soon!")
-          break;
-        case "No":
-          buy();
-          break;
-        case "View":
-          view()
-          break;
-        case "Exit":
-          start();
-          break;
-      }
-    })
-}
+  });
+
+};
+
+
+
+// function again() {
+//   inquirer
+//     .prompt({
+//       name: "addToCart",
+//       type: "list",
+//       message: "Would you like to add this item to your cart?",
+//       choices: ["Yes", "No", "View Cart", "Exit"]
+//     })
+//     .then(function (answer) {
+//       switch (answer.addToCart) {
+//         case "Yes":
+//           console.log("Item added to cart!")
+//           //PUSH item to cart 
+//           //Quantity --
+
+//           break;
+//         case "No":
+
+//           (console.log("Okay, we wont add that to the cart"))
+//           buy();
+//           break;
+//         case "View Cart":
+//           console.log(cart)
+//           break;
+//         case "Exit":
+//           start();
+//           break;
+//       }
+//     })
+// }
