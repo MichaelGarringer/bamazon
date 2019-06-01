@@ -39,6 +39,7 @@ function view() {
   connection.query("SELECT * FROM products", function (err, res) {
     if (err) throw err;
     else {
+      //Alternate means of writing the table, console.table just looks cleaner
       // for (var i = 0; i < res.length; i++) {
       //   console.log(
       //     `
@@ -129,33 +130,3 @@ We will now return you to the beginning
 
 
 
-// function again() {
-//   inquirer
-//     .prompt({
-//       name: "addToCart",
-//       type: "list",
-//       message: "Would you like to add this item to your cart?",
-//       choices: ["Yes", "No", "View Cart", "Exit"]
-//     })
-//     .then(function (answer) {
-//       switch (answer.addToCart) {
-//         case "Yes":
-//           console.log("Item added to cart!")
-//           //PUSH item to cart 
-//           //Quantity --
-
-//           break;
-//         case "No":
-
-//           (console.log("Okay, we wont add that to the cart"))
-//           buy();
-//           break;
-//         case "View Cart":
-//           console.log(cart)
-//           break;
-//         case "Exit":
-//           start();
-//           break;
-//       }
-//     })
-// }
